@@ -29,8 +29,21 @@ for i = 1:imgNum
     H(:,:,i) = solveH(m(:,:,i),M);
 end
 
-%solve B with the help of V
+%solve V (A summarized matrix to restrict B)
 V = zeros(2*imgNum,6);
 for i=1:imgNum
     [V(2*i-1,:),V(2*i,:)]=solveB(H(:,:,i));
 end
+
+%solve B
+[u,s,v]=svd(V);
+b = v(:,end);
+
+%solve A(intrinsic matrix
+v0    = (b(2)*b(4)-b(1)*b(5))/(b(1)*b(3)-b(2)^2);
+lamda = b(6)-(b(4)^2+(b(2)*b(4)-b(1)*b(5))/(b(1)*b(3)-b(2)^2)*(b(2)*b(4)-b(1)*b(5)))/b(1);
+alpha = sqrt(lamda/b(1));
+beta  = sqrt((lamda*b(1))/(b(1)*b(3)-b(2)^2));
+c     = -(b(2)*alpha^2*beta)/lamda;
+u0    = (c*(b(2)*v0))/alpha-(b(4)*alpha^2)/lamda;
+A = [alpha c u0;0 beta v0;0 0 1];
