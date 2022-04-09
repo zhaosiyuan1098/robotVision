@@ -32,5 +32,5 @@ end
 %solve B with the help of V
 V = zeros(2*imgNum,6);
 for i=1:imgNum
-    [V(2*i-1,:),V(2*i,:)]=solveB(H(:,:,i));
+    V(12i-12:12i)solveB(H(:,:,i));
 end
