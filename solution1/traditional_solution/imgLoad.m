@@ -1,3 +1,5 @@
+clear;
+
 %load images and data processing
 imgPath='.\images\';
 squareSize=0.01;
