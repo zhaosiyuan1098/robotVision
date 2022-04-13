@@ -78,17 +78,19 @@ for i = 1:imgNum
     end
 end
 k0 = inv(D'*D)*D'*d;
-param3 = [alpha c u0 beta v0 k0'];
+k3=0;
+k4=0;
+param = [alpha c u0 beta v0 k0' k3 k4];
 options = optimset('Algorithm','levenberg-marquardt');
-[x,res3] = lsqnonlin(@toMinimize2, param3 ,[],[], options, m, M, H);
-res3 = res3/(imgNum*boardCornerNum);
+[x,res] = lsqnonlin(@toMinimize2, param ,[],[], options, m, M, H);
+res = res/(imgNum*boardCornerNum);
 alpha = x(1);c = x(2);u0 = x(3);beta = x(4);v0 = x(5);
 A3 = [alpha c u0;0 beta v0;0 0 1];
 A = A3;
-k = [x(6); x(7)];
+k = [x(6); x(7);x(8);x(9)];
 disp("A:");
 disp(A);
 disp("K:");
 disp(k);
 disp("平均误差为：");
-disp(res3);
+disp(res);
