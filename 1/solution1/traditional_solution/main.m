@@ -2,7 +2,7 @@ clear;
 
 %load images and data processing
 imgPath='.\images\';
-squareSize=0.01;
+squareSize=20;
 imgPathList = dir(strcat(imgPath,'*.jpg'));
 imgNum = length(imgPathList);
 
@@ -51,16 +51,6 @@ u0    = (c*(b(2)*v0))/alpha-(b(4)*alpha^2)/lamda;
 A = [alpha c u0;0 beta v0;0 0 1];
 
 %solve RT(extrinic matrix)
-lamda = (norm(inv(A)*H(:,1))+norm(inv(A)*H(:,2)))/2;
-r1 = 1/lamda*inv(A)*H(:,1);
-r2 = 1/lamda*inv(A)*H(:,2);
-r3 = cross(r1, r2);
-R = [r1 r2 r3];
-[u,s,v] = svd(R);
-R = u*v';
-t = 1/lamda*inv(A)*H(:,3);
-RT = [R(:,1) R(:,2) t];
-
 %solve Ks
 D = [];
 d = [];
@@ -80,17 +70,17 @@ end
 k0 = inv(D'*D)*D'*d;
 k3=0;
 k4=0;
-param = [alpha c u0 beta v0 k0' k3 k4];
+param = [alpha c u0 beta v0 k0' k3 k4 ];
 options = optimset('Algorithm','levenberg-marquardt');
-[x,res] = lsqnonlin(@toMinimize2, param ,[],[], options, m, M, H);
-res = res/(imgNum*boardCornerNum);
+[x,resnorm,residual,exitflag,output] = lsqnonlin(@toMinimize2, param ,[],[], options, m, M, H);
+res = resnorm/(imgNum*boardCornerNum);
 alpha = x(1);c = x(2);u0 = x(3);beta = x(4);v0 = x(5);
 A3 = [alpha c u0;0 beta v0;0 0 1];
-A = A3;
-k = [x(6); x(7);x(8);x(9)];
+k = [x(6); x(7);x(8);x(9);];
+
 disp("A:");
-disp(A);
+disp(A3);
 disp("K:");
 disp(k);
-disp("平均误差为：");
+disp("res:");
 disp(res);
