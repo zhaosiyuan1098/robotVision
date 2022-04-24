@@ -15,9 +15,9 @@ end
 
 %% compare four methods of edge detection
 
-BW1=edge(grayImg,'Roberts',0.1);
+BW1=edge(grayImg,'Roberts',0.03);
 BW2=edge(grayImg,'Sobel',0.03);
-BW3=edge(grayImg,'Prewitt',0.09);
+BW3=edge(grayImg,'Prewitt',0.03);
 BW4=edge(grayImg,'Canny',0.2);
 edgeImg=BW4;
 
@@ -69,8 +69,15 @@ for i=1:length(circleEdges)
     yc = -b/2;
     subCenters(i,:)=[yc,xc];
     subRadiums(i)=sqrt((xc^2 + yc^2) - c);
-    %     pause;
 end
+SubCenters_6=subCenters;
+SubCenters_6(4,:)=[];
+abc=[SubCenters_6(:,2),SubCenters_6(:,1),ones(size(SubCenters_6,1),1)]\-(SubCenters_6(:,2).^2+SubCenters_6(:,1).^2);
+a=abc(1);b=abc(2);c=abc(3);
+xc = -a/2;
+yc = -b/2;
+center_6=[yc,xc];
+radium_6=sqrt((xc^2 + yc^2) - c);
 
 %% calculate distances in image coordinates of each circle centers
 
@@ -112,70 +119,83 @@ convRate=50/abs(endX-startX);
 %% calculate real size
 trueDistanceMatrix=distanceMatrix.*convRate;
 trueSubDiameters=subRadiums.*convRate*2;
-
+trueDiameter_6=radium_6*convRate*2;
 
 %% draw
-% figure;
-% subplot(2,2,1);
-% imshow(BW1);
-% title('Robert')
-% subplot(2,2,2);
-% imshow(BW2);
-% title('Sobel')
-% subplot(2,2,3);
-% imshow(BW3);
-% title('Prewitt');
-% subplot(2,2,4);
-% imshow(BW4);
-% title('Canny')
-% 
-% figure;
-% imshow(edgeImg);
-% viscircles(foreCenters, radii,'EdgeColor','b');
-% 
-% figure;
-% imshow(edgeCloseImg);
-% 
-% figure;
-% imshow(roiImg);
-% 
-% figure;
-% imshow(originImg);
-% hold on;
-% circleTheta=-pi:0.01:pi;
-% for i =1:length(subCenters)
-%     xfit=subRadiums(i)*cos(circleTheta)+subCenters(i,2);
-%     yfit=subRadiums(i)*sin(circleTheta)+subCenters(i,1);
-%     plot(xfit,yfit,'b-');
-% end
-% 
-% figure;
-% subplot(2,1,1);
-% imshow(imadjust(rescale(H)),'XData',T,'YData',R,...
-%     'InitialMagnification','fit');
-% title('Hough transform of gantrycrane.png');
-% xlabel('\theta'), ylabel('\rho');
-% axis on, axis normal, hold on;
-% colormap(gca,hot);
-% subplot(2,1,2);
-% imshow(H,[],'XData',T,'YData',R,'InitialMagnification','fit');
-% xlabel('\theta'), ylabel('\rho');
-% axis on, axis normal, hold on;
-% plot(T(P(:,2)),R(P(:,1)),'s','color','white');
-% 
-% figure;
-% subplot(3,1,1);
-% imshow(rulerOriginImg);
-% subplot(3,1,2);
-% imshow(rulerEdgeImg)
-% subplot(3,1,3);
-% imshow(rulerEdgeImg), hold on
-% for k = 1:length(lines)
-%     xy = [lines(k).point1; lines(k).point2];
-%     plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
-%     
-%     % Plot beginnings and ends of lines
-%     plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');
-%     plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
-% end
+figure;
+subplot(2,2,1);
+imshow(BW1);
+title('Robert')
+subplot(2,2,2);
+imshow(BW2);
+title('Sobel')
+subplot(2,2,3);
+imshow(BW3);
+title('Prewitt');
+subplot(2,2,4);
+imshow(BW4);
+title('Canny')
+
+figure;
+imshow(edgeImg);
+viscircles(foreCenters, radii,'EdgeColor','b');
+
+figure;
+imshow(edgeCloseImg);
+
+figure;
+imshow(roiImg);
+
+figure;
+imshow(originImg);
+hold on;
+circleTheta=-pi:0.01:pi;
+for i =1:length(subCenters)
+    xfit=subRadiums(i)*cos(circleTheta)+subCenters(i,2);
+    yfit=subRadiums(i)*sin(circleTheta)+subCenters(i,1);
+    plot(xfit,yfit,'r');
+    plot(subCenters(i,2),subCenters(i,1),'ro-','MarkerFaceColor','r');
+    str={['diameter:',num2str(trueSubDiameters(i))],...
+        ['center:[',num2str(subCenters(i,2)),',',num2str(subCenters(i,1)),']']...
+        num2str(i)};
+    text(subCenters(i,2)+5,subCenters(i,1),str,'color','red');
+end
+xfit=radium_6*cos(circleTheta)+center_6(2);
+yfit=radium_6*sin(circleTheta)+center_6(1);
+plot(xfit,yfit,'b-');
+plot(center_6(2),center_6(1),'ro-','MarkerFaceColor','g');
+str={['diameter:',num2str(radium_6)],...
+    ['center:[',num2str(center_6(2)),',',num2str(center_6(1)),']']};
+text(center_6(2)+5,center_6(1)+10,str,'color','g');
+
+
+figure;
+subplot(2,1,1);
+imshow(imadjust(rescale(H)),'XData',T,'YData',R,...
+    'InitialMagnification','fit');
+title('Hough transform of gantrycrane.png');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+colormap(gca,hot);
+subplot(2,1,2);
+imshow(H,[],'XData',T,'YData',R,'InitialMagnification','fit');
+xlabel('\theta'), ylabel('\rho');
+axis on, axis normal, hold on;
+plot(T(P(:,2)),R(P(:,1)),'s','color','white');
+
+figure;
+subplot(3,1,1);
+imshow(rulerOriginImg);
+subplot(3,1,2);
+imshow(rulerEdgeImg)
+subplot(3,1,3);
+imshow(rulerEdgeImg), hold on
+for k = 1:length(lines)
+    xy = [lines(k).point1; lines(k).point2];
+    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');
+    
+    % Plot beginnings and ends of lines
+    plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');
+    plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
+end
 
